@@ -81,6 +81,7 @@ namespace MRabbitMQ.Consumer.PilotICE
 
                 //var myDeserializedClass = JsonConvert.DeserializeObject<RabbitMQ.Consumer.PilotICE.AsumiDoc>(message);
 
+                new SearchService().StartSearch();
                
 
                var myDeserializedClass = JsonConvert.DeserializeObject<List<Root>>(message);
