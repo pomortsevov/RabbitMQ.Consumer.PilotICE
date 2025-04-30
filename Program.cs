@@ -69,17 +69,7 @@ namespace RabbitMQ.Consumer.PilotICE
 
             // Log.Information( string.Format("Can't connect RabbitMQ  Host: {0} Exchange: {1} Queue: {1}", HostName, Exchange, Queue));
 
-            //Console.WriteLine(RabbitMQClientConfig.RabbitMQUrl);
-            //Console.WriteLine(RabbitMQClientConfig.IsEnabled);
-            //Console.WriteLine(RabbitMQClientConfig.Timeout);
-
-            //Console.WriteLine(RabbitMQClientConfig.PilotICE_URL);
-            //Console.WriteLine(RabbitMQClientConfig.PilotICE_user);
-            //Console.WriteLine(RabbitMQClientConfig.PilotICE_passwd);
-
-
-
-
+           
 
             string UserName = RabbitMQClientConfig.RabbitMQUser,
                    Password = RabbitMQClientConfig.RabbitMQPassword,
@@ -100,7 +90,7 @@ namespace RabbitMQ.Consumer.PilotICE
                 var connection = connectionFactory.CreateConnection();
                 var channel = connection.CreateModel();
 
-                 Log.Information(string.Format("Connected RabittMQ: {0} ", RabbitMQClientConfig.PilotICE_URL));
+                  Log.Information(string.Format("Connected RabittMQ: {0} ", RabbitMQClientConfig.PilotICE_URL));
                 Log.Information(string.Format("RabbitMQ  Host: {0} Exchange: {1} Queue: {1}", HostName, Exchange, Queue));
                 //Log.Information("RabbitMQ.Produser started");
 

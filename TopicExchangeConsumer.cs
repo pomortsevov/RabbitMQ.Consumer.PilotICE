@@ -15,11 +15,27 @@ using RabbitMQ.Consumer.PilotICE;
 using Ascon.Pilot.Common.DataProtection;
 using Ascon.Pilot.SDK;
 using Serilog;
+using Ascon.Pilot.ClientCore.Search;
+using Ascon.Pilot.Server.Api;
+//ing QuerySearchSample;
 
 namespace MRabbitMQ.Consumer.PilotICE
 {
     public static class TopicExchangeConsumer
     {
+        private static Guid _new_guid;
+        private static Guid _guid2;
+
+        private static void Serar (RabbitMQConsumerConfig ConfigApp, string SearchAtrib)
+        {
+            //var credentials2 = ConnectionCredentials.GetConnectionCredentials(ConfigApp.PilotICE_URL,
+            //                                                                   ConfigApp.PilotICE_user,
+            //                                                                   ConfigApp.PilotICE_passwd.ConvertToSecureString());
+            new SearchService().StartSearch("ID_ContractsHar", SearchAtrib) ;
+
+        }
+
+
 
         public static void Consume(IModel RabbitMQ_channel, RabbitMQConsumerConfig ConfigApp )
         {
@@ -29,9 +45,14 @@ namespace MRabbitMQ.Consumer.PilotICE
                                                                                ConfigApp.PilotICE_user,
                                                                                ConfigApp.PilotICE_passwd.ConvertToSecureString());
 
+            
+
+
             remoteProvider.ConnectToPilotServer(credentials);
 
             Log.Information(string.Format("Connect PilotICE Server  Host: {0}", ConfigApp.PilotICE_URL));
+
+            //Serar(ConfigApp);
 
 
             var backend = remoteProvider.GetBackend();
@@ -55,12 +76,12 @@ namespace MRabbitMQ.Consumer.PilotICE
 
             var documentInfo = new DocumentInfo(DirectoryHelper.GetLocalFile());
             var sectionObject = sectionBuilder.GetNewObject();
-            
-            
+
+
 
             
 
-
+            
 
 
             RabbitMQ_channel.ExchangeDeclare( "mechel_asumi", ExchangeType.Topic);
@@ -81,17 +102,24 @@ namespace MRabbitMQ.Consumer.PilotICE
 
                 //var myDeserializedClass = JsonConvert.DeserializeObject<RabbitMQ.Consumer.PilotICE.AsumiDoc>(message);
 
-                new SearchService().StartSearch();
                
 
-               var myDeserializedClass = JsonConvert.DeserializeObject<List<Root>>(message);
+                var myDeserializedClass = JsonConvert.DeserializeObject<List<Root>>(message);
 
                 Console.WriteLine(myDeserializedClass[0].JsonDogPIR[0].ContractTheme )   ;
                 Log.Information(string.Format("Desirilize JSON object : {0}",
                        myDeserializedClass[0].JsonDogPIR[0].NumDocRab));
 
+                //Serar(ConfigApp, "xxx");
+                Serar(ConfigApp, "xxx");
+
+
                 var documentType = backend.GetType("me_folder_dog_pir");
-                modifier.CreateObject(Guid.NewGuid(), sectionObject.Id, documentType.Id)
+                _new_guid = Guid.NewGuid();
+               
+                
+                modifier.CreateObject( _new_guid, sectionObject.Id, documentType.Id)
+                    .SetAttribute("Id_CustContracts", myDeserializedClass[0].JsonDogPIR[0].Id_CustContracts)    
                     .SetAttribute("ContractsTip", myDeserializedClass[0].JsonDogPIR[0].ContractsTip)
                     .SetAttribute("NumDocRab", myDeserializedClass[0].JsonDogPIR[0].NumDocRab)
                     .SetAttribute("Num_Zakaz", myDeserializedClass[0].JsonDogPIR[0].Num_Zakaz)
@@ -133,6 +161,9 @@ namespace MRabbitMQ.Consumer.PilotICE
 
                     .AddFile(documentInfo, storageProvider);
 
+                //modifier.EditObject(_new_guid).SetAttribute("NumDocMI","privet");
+
+
 
                 if (modifier.AnyChanges())
                 {
@@ -141,16 +172,25 @@ namespace MRabbitMQ.Consumer.PilotICE
                         myDeserializedClass[0].JsonDogPIR[0].NumDocRab));
                 }
 
+
+
+                //_guid2 = new Guid("29b5a867-39bf-4e96-a7f3-f6448fac8853");
+                //modifier.EditObject(_guid2).SetAttribute("NumDocMI", "privet");
+                //modifier.Apply();
+
+
             };
 
             RabbitMQ_channel.BasicConsume("mechel_asumi_queue", true, consumer);
             Console.WriteLine("Consumer started");
             Console.ReadLine();
 
-            
 
+           
 
 
         }
+
+       
     }
 }
