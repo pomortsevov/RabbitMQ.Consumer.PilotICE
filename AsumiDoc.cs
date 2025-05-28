@@ -9,7 +9,8 @@ namespace RabbitMQ.Consumer.PilotICE
     // Root myDeserializedClass = JsonConvert.DeserializeObject<List<Root>>(myJsonResponse);
     public class JsonDogPIR
     {
-        public int Id_CustContracts { get; set; }
+        public string Id_CustContracts { get; set; }
+        public string Id_CustContrOsn { get; set; }
         public object ID_Byudzhet_Plan_Doc { get; set; }
         public string ContractsTip { get; set; }
         public string NumDocRab { get; set; }

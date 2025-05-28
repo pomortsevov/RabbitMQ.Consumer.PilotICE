@@ -18,7 +18,9 @@ namespace RabbitMQ.Consumer.PilotICE
         public string PilotICE_URL { get; set; }
         public string PilotICE_user { get; set; }
         public string PilotICE_passwd { get; set; }
-
+        public string PilotICE_search_user { get; set; }
+        public string PilotICE_search_passwd { get; set; }
+       
 
     }
 }

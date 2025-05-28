@@ -15,13 +15,16 @@ namespace RabbitMQ.Consumer.PilotICE
         private string _PilotStartGIUD = "00000001-0001-0001-0001-000000000001";
         private static string _PilotAtributeValue;
 
-        public void StartSearch(string PilotAtributeName , string PilotAtributeValue) 
+        public void StartSearch(string PilotAtributeName, string PilotAtributeValue,
+                                RabbitMQConsumerConfig ConfigApp) 
         {
             _PilotAtributeName = PilotAtributeName;
             _PilotAtributeValue = PilotAtributeValue;
 
             // Connect to demo base pilot-ice_ru
-            var credentials = ConnectionCredentials.GetConnectionCredentials("http://localhost:5545/pilot-ice_ru_1", "search", "2Ad1ly".ConvertToSecureString());
+            var credentials = ConnectionCredentials.GetConnectionCredentials( ConfigApp.PilotICE_URL, 
+                                                                              ConfigApp.PilotICE_search_user, ConfigApp.PilotICE_search_passwd.ConvertToSecureString());
+
             var client = new HttpPilotClient(credentials.GetConnectionString(), credentials.GetConnectionProxy());
             // set isCheckedClientVersion to true if you need to check if the versions of the client and server match
             client.Connect(false);

@@ -31,7 +31,7 @@ namespace MRabbitMQ.Consumer.PilotICE
             //var credentials2 = ConnectionCredentials.GetConnectionCredentials(ConfigApp.PilotICE_URL,
             //                                                                   ConfigApp.PilotICE_user,
             //                                                                   ConfigApp.PilotICE_passwd.ConvertToSecureString());
-            new SearchService().StartSearch("ID_ContractsHar", SearchAtrib) ;
+            new SearchService().StartSearch("Id_CustContracts", SearchAtrib, ConfigApp) ;
 
         }
 
@@ -39,6 +39,7 @@ namespace MRabbitMQ.Consumer.PilotICE
 
         public static void Consume(IModel RabbitMQ_channel, RabbitMQConsumerConfig ConfigApp )
         {
+            string dbPassword = Environment.GetEnvironmentVariable("PILOTICE_PASSWORD");
 
             var remoteProvider = new RemoteApiProvider();
             var credentials = ConnectionCredentials.GetConnectionCredentials( ConfigApp.PilotICE_URL,
@@ -102,16 +103,17 @@ namespace MRabbitMQ.Consumer.PilotICE
 
                 //var myDeserializedClass = JsonConvert.DeserializeObject<RabbitMQ.Consumer.PilotICE.AsumiDoc>(message);
 
-               
+
 
                 var myDeserializedClass = JsonConvert.DeserializeObject<List<Root>>(message);
 
-                Console.WriteLine(myDeserializedClass[0].JsonDogPIR[0].ContractTheme )   ;
+                Console.WriteLine(myDeserializedClass[0].JsonDogPIR[0].ContractTheme);
                 Log.Information(string.Format("Desirilize JSON object : {0}",
                        myDeserializedClass[0].JsonDogPIR[0].NumDocRab));
 
-                //Serar(ConfigApp, "xxx");
-                Serar(ConfigApp, "xxx");
+                string  SearchAtribPilotICECard = myDeserializedClass[0].JsonDogPIR[0].Id_CustContracts;
+
+                Serar(ConfigApp, SearchAtribPilotICECard.ToString() );
 
 
                 var documentType = backend.GetType("me_folder_dog_pir");
@@ -119,7 +121,8 @@ namespace MRabbitMQ.Consumer.PilotICE
                
                 
                 modifier.CreateObject( _new_guid, sectionObject.Id, documentType.Id)
-                    .SetAttribute("Id_CustContracts", myDeserializedClass[0].JsonDogPIR[0].Id_CustContracts)    
+                    .SetAttribute("Id_CustContracts", myDeserializedClass[0].JsonDogPIR[0].Id_CustContracts)
+                 //   .SetAttribute("Id_CustContrOsn", myDeserializedClass[0].JsonDogPIR[0].Id_CustContrOsn)    
                     .SetAttribute("ContractsTip", myDeserializedClass[0].JsonDogPIR[0].ContractsTip)
                     .SetAttribute("NumDocRab", myDeserializedClass[0].JsonDogPIR[0].NumDocRab)
                     .SetAttribute("Num_Zakaz", myDeserializedClass[0].JsonDogPIR[0].Num_Zakaz)
