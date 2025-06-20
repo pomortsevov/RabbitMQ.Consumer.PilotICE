@@ -47,9 +47,11 @@ namespace RabbitMQ.Consumer.PilotICE
         public string PrimDO { get; set; }
         public string KontragentAbrName { get; set; }
         public int id_Objects { get; set; }
+        public string ContractDocLink { get; set; }
+
     }
 
-    public class Root
+    public class RootJSONPir
     {
         public List<JsonDogPIR> JsonDogPIR { get; set; }
     }

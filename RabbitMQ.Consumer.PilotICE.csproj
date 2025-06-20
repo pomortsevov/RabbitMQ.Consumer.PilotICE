@@ -46,14 +46,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AsumiDoc.cs" />
+    <Compile Include="AsumiDogPir.cs" />
+    <Compile Include="AsumiDogSub.cs" />
     <Compile Include="DirectoryHelper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RabbitMQConsumerConfig.cs" />
     <Compile Include="RemoteApiProvider.cs" />
     <Compile Include="SearchResultCallBack.cs" />
-    <Compile Include="SearchService.cs" />
+    <Compile Include="SearchPilotCardService.cs" />
     <Compile Include="TopicExchangeConsumer.cs" />
   </ItemGroup>
   <ItemGroup>

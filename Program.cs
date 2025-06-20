@@ -130,9 +130,9 @@ namespace RabbitMQ.Consumer.PilotICE
             //TopicExchangeConsumer.Consume(channel, RabbitMQClientConfig);
 
 
+            Log.Information("------RabbitMQ.Consumer.PilotICE stoped---------");
 
 
-            
         }
     }
 }

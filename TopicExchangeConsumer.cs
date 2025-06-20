@@ -17,6 +17,8 @@ using Ascon.Pilot.SDK;
 using Serilog;
 using Ascon.Pilot.ClientCore.Search;
 using Ascon.Pilot.Server.Api;
+using System.Diagnostics.Metrics;
+using Newtonsoft.Json.Linq;
 //ing QuerySearchSample;
 
 namespace MRabbitMQ.Consumer.PilotICE
@@ -25,21 +27,23 @@ namespace MRabbitMQ.Consumer.PilotICE
     {
         private static Guid _new_guid;
         private static Guid _guid2;
+        private static List<RootJSONPir> myDeserializedClass;
 
-        private static void Serar (RabbitMQConsumerConfig ConfigApp, string SearchAtrib)
+        private static void SearchPilotICECardAtribute (RabbitMQConsumerConfig ConfigApp, string SearchAtrib)
         {
             //var credentials2 = ConnectionCredentials.GetConnectionCredentials(ConfigApp.PilotICE_URL,
             //                                                                   ConfigApp.PilotICE_user,
             //                                                                   ConfigApp.PilotICE_passwd.ConvertToSecureString());
-            new SearchService().StartSearch("Id_CustContracts", SearchAtrib, ConfigApp) ;
+           new SearchPilotCardService().StartSearch("Id_CustContracts", SearchAtrib, ConfigApp) ;
+           
+
 
         }
 
 
-
         public static void Consume(IModel RabbitMQ_channel, RabbitMQConsumerConfig ConfigApp )
         {
-            string dbPassword = Environment.GetEnvironmentVariable("PILOTICE_PASSWORD");
+            string dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
 
             var remoteProvider = new RemoteApiProvider();
             var credentials = ConnectionCredentials.GetConnectionCredentials( ConfigApp.PilotICE_URL,
@@ -53,7 +57,7 @@ namespace MRabbitMQ.Consumer.PilotICE
 
             Log.Information(string.Format("Connect PilotICE Server  Host: {0}", ConfigApp.PilotICE_URL));
 
-            //Serar(ConfigApp);
+            //SearchPilotICECardAtribute(ConfigApp);
 
 
             var backend = remoteProvider.GetBackend();
@@ -98,25 +102,65 @@ namespace MRabbitMQ.Consumer.PilotICE
             var consumer = new EventingBasicConsumer(RabbitMQ_channel);
             consumer.Received += (sender, e) => {
                 var body = e.Body.ToArray();
-                var message = Encoding.UTF8.GetString(body);
-                //Console.WriteLine(message);
+                var RabbitMQMessage = Encoding.UTF8.GetString(body);
 
-                //var myDeserializedClass = JsonConvert.DeserializeObject<RabbitMQ.Consumer.PilotICE.AsumiDoc>(message);
+                
+
+                JArray rootArray = JArray.Parse( RabbitMQMessage );
+
+                // Берём первый элемент и получаем все его свойства-массивы
+                var JSONarraysInFirstItem = rootArray[0]
+                    .Children<JProperty>()
+                    .Where(p => p.Value is JArray)
+                    .ToList();
+
+                foreach (var arrayProp in JSONarraysInFirstItem)
+                {
+                    Console.WriteLine($"Имя массива: {arrayProp.Name}");
+                    JArray array = (JArray)arrayProp.Value;
+
+                    switch (arrayProp.Name)
+                    {
+                        case "JsonDogPIR":
+                            Console.WriteLine($"Имя массива: {arrayProp.Name}");
+
+                            myDeserializedClass = JsonConvert.DeserializeObject<List<RootJSONPir>>(RabbitMQMessage);
+
+                            Console.WriteLine(myDeserializedClass[0].JsonDogPIR[0].ContractTheme);
+                            Log.Information(string.Format("Desirilize JSON  Id_CustContracts: {0}",
+                                                 myDeserializedClass[0].JsonDogPIR[0].Id_CustContracts));
+
+                            string SearchAtribPilotICECard = myDeserializedClass[0].JsonDogPIR[0].Id_CustContracts;
+
+                            SearchPilotICECardAtribute(ConfigApp, SearchAtribPilotICECard.ToString());
+
+
+                            break;
+                        case "JsonDogSUB":
+                            Console.WriteLine($"Имя массива: {arrayProp.Name}");
+                            break;
+                        default:
+                            Console.WriteLine("Неизвестный массив");
+                            break;
+                    }
+
+                    //foreach (JToken item in array)
+                    //{
+
+
+                    //    Console.WriteLine($"id_SubContracts: {item["id_SubContracts"]}");
+                    //}
+                }
 
 
 
-                var myDeserializedClass = JsonConvert.DeserializeObject<List<Root>>(message);
 
-                Console.WriteLine(myDeserializedClass[0].JsonDogPIR[0].ContractTheme);
-                Log.Information(string.Format("Desirilize JSON object : {0}",
-                       myDeserializedClass[0].JsonDogPIR[0].NumDocRab));
-
-                string  SearchAtribPilotICECard = myDeserializedClass[0].JsonDogPIR[0].Id_CustContracts;
-
-                Serar(ConfigApp, SearchAtribPilotICECard.ToString() );
+               
 
 
-                var documentType = backend.GetType("me_folder_dog_pir");
+
+
+                 var documentType = backend.GetType("me_folder_dog_pir");
                 _new_guid = Guid.NewGuid();
                
                 
@@ -171,8 +215,8 @@ namespace MRabbitMQ.Consumer.PilotICE
                 if (modifier.AnyChanges())
                 {
                     modifier.Apply();
-                    Log.Information(string.Format("Insert card to PilotICE  Host: {0}", 
-                        myDeserializedClass[0].JsonDogPIR[0].NumDocRab));
+                    Log.Information(string.Format("Insert card to PilotICE  Id_CustContracts: {0}", 
+                        myDeserializedClass[0].JsonDogPIR[0].Id_CustContracts));
                 }
 
 
