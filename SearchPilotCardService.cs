@@ -102,12 +102,12 @@ namespace RabbitMQ.Consumer.PilotICE
                 //query.Must(ObjectFields.ParentId.Be(parentId));
                 Console.WriteLine($"Id's:\n{string.Join("\n", res.Found)}");
 
-                FoundPilotICEUID = res.Found;
+                    FoundPilotICEUID = res.Found;
                 //FoundPilotICEUID.Add( res.Found );
                 // localserch = res;
                 //Log.Information(string.Format("Найдены UID: {0}", );
 
-
+               
 
             }
 

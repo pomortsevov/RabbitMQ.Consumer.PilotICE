@@ -11,7 +11,9 @@ namespace RabbitMQ.Consumer.PilotICE
     {
         public string Id_CustContracts { get; set; }
         public string Id_CustContrOsn { get; set; }
-        public object ID_Byudzhet_Plan_Doc { get; set; }
+        public string NumDoc_Byud_sGod { get; set; }
+
+        public string ID_Byudzhet_Plan_Doc { get; set; }
         public string ContractsTip { get; set; }
         public string NumDocRab { get; set; }
         public string Num_Zakaz { get; set; }
