@@ -11,6 +11,7 @@ using System.Security.Principal;
 using Ascon.Pilot.DataClasses;
 using Ascon.Pilot.DataModifier;
 using Ascon.Pilot.Server.Api;
+
 using RabbitMQ.Consumer.PilotICE;
 using Ascon.Pilot.Common.DataProtection;
 using Ascon.Pilot.SDK;
@@ -22,29 +23,76 @@ using Newtonsoft.Json.Linq;
 using System.Threading;
 using System.Net.Mime;
 using System.Web.UI.WebControls.WebParts;
+using System.Runtime.CompilerServices;
+using log4net.ObjectRenderer;
+using log4net;
 //ing QuerySearchSample;
+
+
+
 
 namespace MRabbitMQ.Consumer.PilotICE
 {
     public static class TopicExchangeConsumer
     {
-        private static Guid _new_guid;
+        //private static Guid _new_guid;
         private static Guid _guid2;
         private static List<RootJSONPir> myDeserializedClass;
-
+      
         private static void SearchPilotICECardAtribute (RabbitMQConsumerConfig ConfigApp, string SearchAtrib)
         {
             //var credentials2 = ConnectionCredentials.GetConnectionCredentials(ConfigApp.PilotICE_URL,
             //                                                                   ConfigApp.PilotICE_user,
             //                                                                   ConfigApp.PilotICE_passwd.ConvertToSecureString());
-           new SearchPilotCardService().StartSearch("Id_CustContracts", SearchAtrib, ConfigApp) ;
+            new SearchPilotCardService().StartSearch("Id_CustContracts", SearchAtrib, ConfigApp)    ;
            
+            //SearchPilotCardService.
+            //Console.WriteLine($"Найдено объектов: {0}. Первый ID: {firstId}");
+        }
+
+
+        public static void PilotICE_ModifyCard_PIR(RemoteApiProvider PilotICE_RemoteProvider,
+                                               string PilotICE_ID, string PilotICE_Cart_ParentType,
+                                               string PilotICE_Cart_InsertedType,
+                                               List<RootJSONPir> JSON_PIR)
+        {
+
+
+          
+            var backend = PilotICE_RemoteProvider.GetBackend();
+
+            var _guid = new Guid(PilotICE_ID);
+            var folderType_parent = backend.GetType(PilotICE_Cart_ParentType);
+
+
+
+            var PIRType = backend.GetType(PilotICE_Cart_InsertedType);
+
+
+            var modifier_dog = PilotICE_RemoteProvider.GetNewModifier();
+
+            var id = Guid.NewGuid();
+
+            var builder = modifier_dog.EditObject(_guid)
+                                .SetAttribute("NumDocRab", "privet2")
+                                .SetAttribute("Type_Export_Card", "Изменение документа")
+                                .SetAttribute("Date_Instert_Card", DateTime.Now.ToString("dd-MM-yyyy-HH-mm-ss"))
+                                .SetAttribute("ContractTheme", JSON_PIR[0].JsonDogPIR[0].ContractTheme)
+                                .SetAttribute("GIP", "search")
+                                
+                                ;
+
+            modifier_dog.Apply();
+
+            Log.Information(string.Format("Modify card  PilotICE Id_CustContracts: {0}",
+                            myDeserializedClass[0].JsonDogPIR[0].Id_CustContracts));
 
 
         }
 
 
-        public static void PilotICE_InsertCard_PIR (RemoteApiProvider PilotICE_RemoteProvider, 
+
+        public static void PilotICE_InsertNewCard_PIR (RemoteApiProvider PilotICE_RemoteProvider, 
                                                 string PilotICE_Parent_ID, string PilotICE_Cart_ParentType,
                                                 string PilotICE_Cart_InsertedType,
                                                 List<RootJSONPir> JSON_PIR)
@@ -86,6 +134,9 @@ namespace MRabbitMQ.Consumer.PilotICE
 
 
             modifier_dog.Apply();
+
+            Log.Information(string.Format("Insert card to PilotICE  Id_CustContracts: {0}",
+                             myDeserializedClass[0].JsonDogPIR[0].Id_CustContracts));
 
         }
 
@@ -243,13 +294,13 @@ namespace MRabbitMQ.Consumer.PilotICE
 
                 foreach (var arrayProp in JSONarraysInFirstItem)
                 {
-                    Console.WriteLine($"Имя массива: {arrayProp.Name}");
+                    //Console.WriteLine($"Имя JSON массива: {arrayProp.Name}");
                     JArray array = (JArray)arrayProp.Value;
 
                      switch (arrayProp.Name)
                     {
                         case "JsonDogPIR":
-                            Console.WriteLine($"Имя массива: {arrayProp.Name}");
+                            //Console.WriteLine($"Имя массива: {arrayProp.Name}");
 
                             myDeserializedClass = JsonConvert.DeserializeObject<List<RootJSONPir>>(RabbitMQMessage);
 
@@ -264,15 +315,25 @@ namespace MRabbitMQ.Consumer.PilotICE
                             
                             if (Search_Id_CustContracts == Search_Id_CustContractsOsn )
                             {
-                                PilotICE_InsertCard_PIR(remoteProvider,
+                                SearchPilotICECardAtribute(ConfigApp, Search_Id_CustContracts.ToString());
+
+                                PilotICE_InsertNewCard_PIR(remoteProvider,
                                     "e9ca9e59-d778-47d4-b557-a6223b830d35", "me_folder_dog_pir_all", 
                                     "me_folder_dog_pir", myDeserializedClass);
 
-                            } else
+                                PilotICE_ModifyCard_PIR(remoteProvider,
+                                    "8213bcaa-d8b8-4555-be20-0063100d7a8c", "me_folder_dog_pir_all",
+                                    "me_folder_dog_pir", myDeserializedClass);
+
+
+
+                            }
+                            else
                             {
 
                                 SearchPilotICECardAtribute(ConfigApp, Search_Id_CustContracts.ToString());
-                                PilotICE_InsertCard_PIR(remoteProvider,
+
+                                PilotICE_InsertNewCard_PIR(remoteProvider,
                                     "095ef9bd-a55a-421a-8b60-2570c920104b", "me_folder_dog_pir_all",
                                     "me_folder_dog_pir", myDeserializedClass);
 

@@ -6,6 +6,7 @@ using Ascon.Pilot.Server.Api.Contracts;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Net;
 
@@ -18,16 +19,30 @@ namespace RabbitMQ.Consumer.PilotICE
         private static string _PilotAtributeValue;
         private static int _PilotICE_licence = 103;
 
+
         //public bool  DSearchResult localserch;
         //public List<string> FoundPilotICEUID = new List<string>();
         public object FoundPilotICEUID ;
 
-        public int r;
+        public object firstId;
+        public string FirstID_str;
+        // public string Str { get; set; } = "Hello from SecondClass";
+
+        public string fst;
 
         //DSearchResult res_search;
 
+        private void ShowResult1_Adapted(DSearchResult res)
+        {
+            SearchResultContainer container = ShowResult1(res); 
+
+            Console.WriteLine(container.FirstID );
+            fst= container.FirstID;
+        }
+
+
         public void StartSearch(string PilotAtributeName, string PilotAtributeValue,
-                                RabbitMQConsumerConfig ConfigApp) 
+                                RabbitMQConsumerConfig ConfigApp)
         {
             _PilotAtributeName = PilotAtributeName;
             _PilotAtributeValue = PilotAtributeValue;
@@ -39,10 +54,13 @@ namespace RabbitMQ.Consumer.PilotICE
             var client = new HttpPilotClient(credentials.GetConnectionString(), credentials.GetConnectionProxy());
             // set isCheckedClientVersion to true if you need to check if the versions of the client and server match
             client.Connect(false);
-            
-            var resultCallBack = new SearchResultCallBack(ShowResult1);
-           
-           
+
+            //var resultCallBack = new SearchResultCallBack(ShowResult1);
+
+            var resultCallBack = new SearchResultCallBack(ShowResult1_Adapted);
+
+            Console.WriteLine(fst);
+
 
             var serverApi = client.GetServerApi(resultCallBack);
             client.GetAuthenticationApi().Login(credentials.DatabaseName, credentials.Username, credentials.ProtectedPassword, false, _PilotICE_licence);
@@ -56,10 +74,7 @@ namespace RabbitMQ.Consumer.PilotICE
 
         private DSearchDefinition MakeSearchDefinition()
         {
-            //var id = new Guid("00000000-0000-0000-0000-000000000000");
-           
-
-
+            
             var query = QueryBuilderFactory.CreateEmptyQueryBuilder();
 
 
@@ -92,8 +107,17 @@ namespace RabbitMQ.Consumer.PilotICE
             };
         }
 
-        private void ShowResult1(DSearchResult res)
+        private SearchResultContainer ShowResult1(DSearchResult res)
         {
+            var resultContainer = new SearchResultContainer();
+
+            if (res.Found != null) // Предположим, что Ids - это коллекция
+            {
+                resultContainer.FirstID = res.Found.First().ToString();
+                //Console.WriteLine($"Добавлено ID: {string.Join(", ", res.Ids)}");
+            }
+
+
             // Use search result here
             if (res.Found == null) Console.WriteLine("Совпрадений по Id_CustContracts нет");
             else
@@ -107,17 +131,22 @@ namespace RabbitMQ.Consumer.PilotICE
                 // localserch = res;
                 //Log.Information(string.Format("Найдены UID: {0}", );
 
-               
+                firstId = res.Found.First();
+
+                FirstID_str = res.Found.First().ToString();
+                Console.WriteLine($"Найдено объектов: {res.Found.Count()}. Первый ID: {firstId}");
+
 
             }
-
+            return resultContainer;
         }
 
 
-        private void res()
+        public string GetFirstID()
         {
 
-
+        return  FirstID_str;
+           
 
         }
 

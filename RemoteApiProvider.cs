@@ -16,6 +16,8 @@ namespace RabbitMQ.Consumer.PilotICE
         private IServerApi _serverApi;
         private FileSystemStorageProvider _fileStorageProvider;
 
+        public object PilotICEContext { get; internal set; }
+
         public void ConnectToPilotServer(ConnectionCredentials credentials)
         {
             var httpClient = new HttpPilotClient(credentials.GetConnectionString(), credentials.GetConnectionProxy());
